@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Don't Trust The Author</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16213a;
+    --ink-2:#1f3050;
+    --teal:#2dd4bf;
+    --teal-deep:#0f9488;
+    --magenta:#ff6f61;
+    --magenta-deep:#e2483a;
+    --orange:#ffc857;
+    --paper:#fbf3e0;
+    --paper-2:#f3e4bd;
+    --paper-3:#e8d29c;
+    --text-cream:#fdf2df;
+    --text-ink:#2a1a30;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:var(--ink);
+    color:var(--text-cream);
+    font-family:'Newsreader', Georgia, serif;
+    overflow-x:hidden;
+    position:relative;
+  }
+  ::selection{ background:var(--magenta); color:#fff; }
+  a{ color:inherit; }
+
+  .rounded{ font-family:'Fredoka', sans-serif; letter-spacing:.03em; }
+  .eyebrow-label{
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size:.72rem;
+    letter-spacing:.16em; text-transform:uppercase;
+  }
+
+  .grain{
+    position:fixed; inset:0; z-index:2; pointer-events:none;
+    opacity:.045; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+  }
+  :focus-visible{ outline:2px solid var(--teal); outline-offset:3px; }
+
+  /* ---------- Nav ---------- */
+  nav{
+    position:fixed; top:0; left:0; width:100%; z-index:200;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 32px;
+    background:rgba(38,16,46,.62);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(255,111,97,.35);
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .seal{
+    width:36px; height:36px; border-radius:50%; flex-shrink:0;
+    background:linear-gradient(135deg, var(--teal), var(--magenta));
+    box-shadow:0 3px 12px rgba(0,0,0,.4);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fredoka', sans-serif; font-weight:700; font-size:.7rem; color:#fff;
+  }
+  .brand-name{ font-family:'Fraunces', serif; font-size:1rem; font-weight:600; letter-spacing:.02em; color:var(--text-cream); display:none; }
+  .nav-links{ display:flex; gap:26px; }
+  .nav-links button{
+    background:none; border:none; cursor:pointer;
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase;
+    color:#d9b8de; padding:6px 2px; position:relative;
+    transition:color .25s ease;
+  }
+  .nav-links button::after{
+    content:""; position:absolute; left:0; bottom:0; height:2px; width:0%; border-radius:2px;
+    background:linear-gradient(90deg, var(--teal), var(--magenta)); transition:width .3s ease;
+  }
+  .nav-links button:hover{ color:#fff; }
+  .nav-links button:hover::after{ width:100%; }
+  .nav-links button.active{ color:#fff; }
+  .nav-links button.active::after{ width:100%; }
+
+  .page{ display:none; min-height:100vh; position:relative; }
+  .page.active{ display:block; }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:110px 20px 50px;
+    position:relative; overflow:hidden;
+    background:linear-gradient(180deg, #16213a 0%, #1c3450 24%, #1c6e73 52%, #ff6f61 80%, #ffc857 100%);
+  }
+  .spark{ position:absolute; border-radius:50%; background:var(--text-cream); opacity:.7; animation:twinkle 3.4s ease-in-out infinite; }
+  @keyframes twinkle{ 0%,100%{ opacity:.15; transform:scale(.7); } 50%{ opacity:.9; transform:scale(1.1); } }
+
+  .eyebrow{ color:var(--text-cream); margin-bottom:22px; opacity:0; animation:fadeUp .8s ease forwards .1s; }
+  .eyebrow span{ color:var(--teal); }
+
+  #heroMedia{
+    width:min(940px, 92vw);
+    position:relative;
+    opacity:0; transform:translateY(16px) scale(.99);
+    animation:revealMedia 1s ease forwards .3s;
+    transition:opacity .25s linear, transform .25s linear;
+    will-change:opacity, transform;
+  }
+  @keyframes revealMedia{ to{ opacity:1; transform:translateY(0) scale(1); } }
+
+  .poster-mat{
+    background:var(--paper);
+    padding:14px;
+    border-radius:16px;
+    box-shadow:0 40px 80px -20px rgba(0,0,0,.6), 0 10px 24px rgba(0,0,0,.4);
+    position:relative;
+  }
+  .poster-mat img{
+    display:block; width:100%; border-radius:8px;
+  }
+  .sticker{
+    position:absolute; top:-14px; right:-10px;
+    background:var(--paper); color:var(--magenta-deep);
+    border:2px solid var(--magenta);
+    border-radius:999px; padding:10px 16px;
+    font-family:'Fredoka', sans-serif; font-weight:700; font-size:.68rem; letter-spacing:.05em; text-transform:uppercase;
+    transform:rotate(-7deg);
+    box-shadow:0 8px 18px rgba(0,0,0,.35);
+    text-align:center; line-height:1.3;
+  }
+
+  .hero-ctas{ display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-top:34px; opacity:0; animation:fadeUp .9s ease forwards .8s; }
+  .btn-pop, .btn-ghost{
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size:.85rem; letter-spacing:.02em;
+    padding:15px 30px; cursor:pointer; border-radius:999px; transition:transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+  }
+  .btn-pop{
+    background:linear-gradient(120deg, var(--teal), var(--magenta)); color:#fff; border:none;
+    box-shadow:0 10px 24px rgba(226,72,58,.35);
+  }
+  .btn-pop:hover{ transform:translateY(-2px); box-shadow:0 14px 30px rgba(226,72,58,.48); }
+  .btn-ghost{ background:rgba(255,255,255,.08); border:2px solid var(--text-cream); color:var(--text-cream); }
+  .btn-ghost:hover{ background:var(--text-cream); color:var(--ink); }
+
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:translateY(0); } }
+
+  .scroll-cue{
+    position:absolute; bottom:26px; left:50%; transform:translateX(-50%);
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size:.66rem; letter-spacing:.28em; text-transform:uppercase;
+    color:var(--text-cream); display:flex; flex-direction:column; align-items:center; gap:8px;
+    opacity:.85;
+  }
+  .scroll-cue::after{ content:""; width:2px; height:24px; border-radius:2px; background:linear-gradient(var(--text-cream), transparent); animation:pulseLine 2s ease-in-out infinite; }
+  @keyframes pulseLine{ 0%,100%{ opacity:.3; } 50%{ opacity:1; } }
+
+  /* ---------- Content sections ---------- */
+  .content-shell{ max-width:760px; margin:0 auto; padding:70px 24px 120px; position:relative; z-index:5; }
+
+  .manuscript-frame{
+    background:linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+    color:var(--text-ink);
+    padding:44px 42px;
+    position:relative;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.5), 0 2px 0 rgba(255,255,255,.4) inset;
+    border-radius:14px;
+  }
+  .manuscript-frame::before{
+    content:""; position:absolute; inset:0; pointer-events:none; opacity:.4; mix-blend-mode:multiply; border-radius:14px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/></svg>");
+  }
+  .page-curl{
+    position:absolute; right:0; bottom:0; width:0; height:0;
+    border-style:solid; border-width:0 0 38px 38px;
+    border-color:transparent transparent var(--paper-3) transparent;
+    box-shadow:-3px -3px 8px rgba(0,0,0,.18);
+    border-radius:0 0 14px 0;
+  }
+
+  .section-eyebrow{ color:var(--magenta-deep); margin-bottom:14px; display:block; }
+  .section-title{ font-family:'Fraunces', serif; font-weight:700; font-size:1.9rem; margin-bottom:28px; color:var(--text-ink); }
+
+  .synopsis-line{
+    opacity:0; margin-bottom:20px; font-size:1.08rem; line-height:1.75;
+    color:var(--text-ink); transition:opacity 1.1s ease;
+  }
+  .synopsis-line.visible{ opacity:1; }
+  .synopsis-line:last-child{ font-style:italic; color:#5a4530; border-top:1px solid rgba(226,72,58,.25); padding-top:18px; margin-top:26px; }
+  .annot{ text-decoration:underline wavy var(--magenta); text-decoration-thickness:1.5px; text-underline-offset:3px; }
+
+  /* ---------- Read Sample ---------- */
+  .chapter-tag{ display:inline-block; color:var(--magenta-deep); margin-bottom:10px; }
+  .chapter-title{
+    font-family:'Fraunces', serif; font-size:2.1rem; font-weight:700; color:var(--text-ink);
+    margin-bottom:30px; padding-bottom:16px; border-bottom:2px solid var(--paper-3);
+  }
+  .manuscript-body p{
+    font-size:1.08rem; line-height:1.85; margin-bottom:20px; text-align:justify; color:var(--text-ink);
+  }
+  .manuscript-body p:first-of-type::first-letter{
+    font-family:'Fraunces', serif; font-weight:700; font-size:3.6em; line-height:.78; float:left;
+    padding:4px 10px 0 0; color:var(--magenta-deep);
+  }
+  .pagination-bar{
+    display:flex; justify-content:space-between; margin-top:44px; padding-top:24px;
+    border-top:1px solid var(--paper-3);
+  }
+  .control-btn{
+    background:transparent; border:2px solid var(--teal-deep); color:var(--teal-deep);
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size:.75rem; letter-spacing:.04em; text-transform:uppercase;
+    padding:10px 22px; border-radius:999px; cursor:pointer; transition:background .2s ease, color .2s ease;
+  }
+  .control-btn:hover:not(:disabled){ background:var(--teal-deep); color:#fff; }
+  .control-btn:disabled{ opacity:.35; cursor:not-allowed; }
+
+  /* ---------- Bio ---------- */
+  .bio-layout{ overflow:hidden; }
+  .bio-layout::after{ content:""; display:table; clear:both; }
+  .portrait-block{ float:left; width:220px; margin:0 28px 18px 0; }
+  .portrait-frame{
+    padding:9px; background:linear-gradient(150deg, var(--teal), var(--magenta));
+    box-shadow:0 20px 40px -12px rgba(0,0,0,.45); border-radius:12px;
+  }
+  .portrait-frame img{
+    display:block; width:100%; height:250px; object-fit:cover; object-position:center 20%;
+    border-radius:6px;
+  }
+  .plaque{ margin-top:12px; text-align:center; color:var(--magenta-deep); font-size:.68rem; letter-spacing:.1em; }
+  .bio-quote{
+    font-family:'Fraunces', serif; font-style:italic; font-weight:500; font-size:1.5rem;
+    color:var(--text-ink); line-height:1.4; margin-bottom:28px; position:relative; padding-left:6px;
+  }
+  .bio-quote::before{
+    content:"\201C"; position:absolute; left:-2px; top:-34px; font-size:5.5rem; color:var(--paper-3);
+    font-family:'Fraunces', serif; z-index:-1;
+  }
+  .contact-box{
+    margin-top:44px; padding:28px 26px; background:var(--ink); position:relative; overflow:hidden; border-radius:14px;
+  }
+  .contact-box::before{
+    content:""; position:absolute; inset:0; border-radius:14px; border:2px solid var(--teal); pointer-events:none; margin:6px;
+  }
+  .contact-label{ color:var(--teal); margin-bottom:12px; }
+  .contact-lead{ font-family:'Newsreader', serif; color:var(--text-cream); font-size:.98rem; margin-bottom:16px; }
+  .email-anchor{
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size:1rem; letter-spacing:.02em;
+    color:var(--teal); text-decoration:none; border-bottom:2px solid transparent; padding-bottom:2px;
+    transition:color .2s ease, border-color .2s ease;
+  }
+  .email-anchor:hover{ color:var(--magenta); border-color:var(--magenta); }
+
+  .site-footer{ text-align:center; padding:36px 24px 50px; color:#a9789f; font-size:.68rem; }
+
+  @media (max-width:640px){
+    .hero{ padding-top:100px; }
+    .content-shell{ padding:50px 16px 90px; }
+    .manuscript-frame{ padding:30px 22px; }
+    .portrait-block{ float:none; width:180px; margin:0 auto 20px; }
+    .nav-links{ gap:14px; }
+    .nav-links button{ font-size:.68rem; }
+    .brand-name{ display:none; }
+    .sticker{ font-size:.58rem; padding:8px 12px; top:-10px; right:-6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<nav>
+  <div class="brand">
+    <div class="seal">DTA</div>
+    <span class="brand-name">Don't Trust The Author</span>
+  </div>
+  <div class="nav-links">
+    <button id="tab-home" class="active" onclick="navigateTo('home')">Home</button>
+    <button id="tab-read" onclick="navigateTo('read')">Read Sample</button>
+    <button id="tab-bio" onclick="navigateTo('bio')">The Author</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div id="view-home" class="page active">
+  <div class="hero">
+    <span class="spark" style="width:6px;height:6px; top:14%; left:12%; animation-delay:.2s;"></span>
+    <span class="spark" style="width:4px;height:4px; top:22%; left:82%; animation-delay:1.1s;"></span>
+    <span class="spark" style="width:5px;height:5px; top:70%; left:8%; animation-delay:.6s;"></span>
+    <span class="spark" style="width:7px;height:7px; top:78%; left:88%; animation-delay:1.6s;"></span>
+    <span class="spark" style="width:4px;height:4px; top:8%; left:50%; animation-delay:2s;"></span>
+
+    <span class="eyebrow-label eyebrow">A Novel <span>&middot;</span> Volume One</span>
+
+    <div id="heroMedia">
+      <div class="poster-mat">
+        <img src="team.png" alt="Don't Trust the Author — book cover art: a sunset baseball field scene with the title, subtitle, and author name Wesam Saad">
+        <div class="sticker">Advance<br>Reader's<br>Copy</div>
+      </div>
+    </div>
+
+    <div class="hero-ctas">
+      <button class="btn-pop" onclick="navigateTo('read')">Begin Reading</button>
+      <button class="btn-ghost" onclick="navigateTo('bio')">Meet the Author</button>
+    </div>
+
+    <div class="scroll-cue">Scroll</div>
+  </div>
+
+  <div class="content-shell">
+    <div class="manuscript-frame">
+      <h2 class="section-title">The Pitch</h2>
+      <div class="synopsis-wrapper">
+        <p class="synopsis-line" id="sync-row-1">Your best friend gets pregnant at 17, would you adopt the child? <span class="annot">Probably not.</span> What if your brother or long-time boyfriend or his best friend were the father? Still No&hellip;&hellip;but Bonnie would.</p>
+        <p class="synopsis-line" id="sync-row-2">Meet Bonnie, a sharp 17-year-old girl with plans and an unhealthy yearn to keep her sharper friends together one way or another.</p>
+        <p class="synopsis-line" id="sync-row-3">Read as she navigates senior year, a long-term relationship, gender norms, a pennant race, suburban politics, religion, and managing the people around her, all under the watchful eye of an ominous group of mothers&hellip;.one in particular.</p>
+        <p class="synopsis-line" id="sync-row-4">Bonnie and her &ldquo;coalition of the unwilling&rdquo; will make you laugh, cry, question your bravery and how you define a friend&hellip;.or a mother.</p>
+        <p class="synopsis-line" id="sync-row-5">*As told, a generation or two later, by your favorite unemployed &ldquo;sportscaster&rdquo;&ndash;who calls all the balls and strikes on and off the field.*</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- READ -->
+<div id="view-read" class="page">
+  <div class="content-shell" style="padding-top:120px;">
+    <div class="manuscript-frame">
+      <div class="chapter-tag eyebrow-label" id="label-chapter-index">Chapter 1</div>
+      <h2 class="chapter-title" id="label-chapter-title">Loading Chapter...</h2>
+
+      <div class="manuscript-body" id="render-text-target"></div>
+
+      <div class="pagination-bar">
+        <button class="control-btn" id="ui-prev-trigger" onclick="shiftChapter(-1)">&larr; Previous</button>
+        <button class="control-btn" id="ui-next-trigger" onclick="shiftChapter(1)">Next Chapter &rarr;</button>
+      </div>
+      <div class="page-curl"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BIO -->
+<div id="view-bio" class="page">
+  <div class="content-shell" style="padding-top:120px;">
+    <div class="manuscript-frame">
+      <h2 class="section-title">Biography</h2>
+
+      <div class="bio-layout">
+        <div class="portrait-block">
+          <div class="portrait-frame">
+            <img src="author-photo.jpg" alt="Photo of the author">
+          </div>
+          <div class="plaque eyebrow-label">The Author</div>
+        </div>
+
+        <div class="bio-quote">The voice of a generation&hellip;.. I say sorta humbly.</div>
+        <p style="margin-bottom:18px; line-height:1.8;">A writer who cut his teeth on the kitchen table, a math tutor&ndash;for the working class; convincing kids math and science can be fun. Unconvinced and quick to call me a liar, I turned unorthodox topics into a story---honing my skills using the toughest of topics and harshest of critics- that helped pass the time and the information stick.</p>
+        <p style="margin-bottom:18px; line-height:1.8;">Stories so riveting parents couldn&rsquo;t help but listen, hiding in nooks and crannies, happy with their choice in &ldquo;nannies&rdquo;. A tried-and-true method, translated on paper with a story as &ldquo;fictional&rdquo; as theoretical physics and blackholes; much more entertaining I promise. Someone who doesn&rsquo;t look like a writer but&hellip;..hey&hellip;..who&hellip;...writes like one, concise with a style that&rsquo;s engaging&hellip;..kinda like this blurb.</p>
+        <p style="line-height:1.8;">The writer that gives you credibility with the critics and, more importantly engages the casual reader--the people who actually move the needle in society. A writer with wit and grit that success can&rsquo;t dull. Resourceful with flowery and nuanced language in his arsenal, along with the everyday speak that makes him and his reader one. A writer you get to know in his writing explicitly and implicitly. By design, something I can&rsquo;t hide or want to.</p>
+      </div>
+      <div style="clear:both;"></div>
+
+      <div class="contact-box">
+        <h3 class="contact-label eyebrow-label">Inquiries &amp; Agent Queries</h3>
+        <p class="contact-lead">For manuscript requests or representation options, reach out directly at:</p>
+        <a href="mailto:dontrustheauthor@gmail.com" class="email-anchor">dontrustheauthor@gmail.com</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="site-footer eyebrow-label">Don't Trust The Author &mdash; A Novel</div>
+
+<script>
+  const chapterTitles = {
+    1: "Beefing with Mom",
+    2: "Jerry's Pizzeria",
+    3: "Family Bloodlines",
+    4: "Ivan and Yousef",
+    5: "The Watershed Moment"
+  };
+
+  let pointerChapter = 1;
+
+  function navigateTo(targetPageId) {
+    document.querySelectorAll('.page').forEach(view => view.classList.remove('active'));
+    document.querySelectorAll('.nav-links button').forEach(tab => tab.classList.remove('active'));
+
+    if (targetPageId === 'home') {
+      document.getElementById('view-home').classList.add('active');
+      document.getElementById('tab-home').classList.add('active');
+    } else if (targetPageId === 'read') {
+      document.getElementById('view-read').classList.add('active');
+      document.getElementById('tab-read').classList.add('active');
+      fetchAndRenderChapter(pointerChapter);
+    } else if (targetPageId === 'bio') {
+      document.getElementById('view-bio').classList.add('active');
+      document.getElementById('tab-bio').classList.add('active');
+    }
+    window.scrollTo(0, 0);
+  }
+
+  function fetchAndRenderChapter(chapterNumber) {
+    document.getElementById('label-chapter-index').innerText = `Chapter ${chapterNumber}`;
+    document.getElementById('label-chapter-title').innerText = chapterTitles[chapterNumber] || "Reading View";
+
+    const fieldTarget = document.getElementById('render-text-target');
+    fieldTarget.innerHTML = '<p style="text-indent:0; text-align:center; color:#8a7c5a;">Loading text file...</p>';
+
+    fetch(`chapter${chapterNumber}.txt`)
+      .then(response => {
+        if (!response.ok) throw new Error(`Could not locate chapter${chapterNumber}.txt`);
+        return response.text();
+      })
+      .then(rawText => {
+        fieldTarget.innerHTML = '';
+        const paragraphs = rawText.split(/\n\s*\n/);
+        paragraphs.forEach(paraText => {
+          if (paraText.trim().length > 0) {
+            const pElement = document.createElement('p');
+            pElement.innerText = paraText.trim();
+            fieldTarget.appendChild(pElement);
+          }
+        });
+      })
+      .catch(error => {
+        fieldTarget.innerHTML = `
+          <p style="text-indent:0; text-align:center; color:#e2483a; font-weight:600;">[ERROR 404]: UNABLE TO LOAD MANUSCRIPT FILE</p>
+          <p style="text-indent:0; text-align:center; font-size:0.9rem; color:#8a7c5a; margin-top:10px;">
+            Please verify a plain text file named "chapter${chapterNumber}.txt" exists in the exact same directory folder as your index.html file.
+          </p>`;
+        console.error(error);
+      });
+
+    document.getElementById('ui-prev-trigger').disabled = (chapterNumber === 1);
+    const triggerNext = document.getElementById('ui-next-trigger');
+    if (chapterNumber === 5) {
+      triggerNext.innerText = "End of Preview";
+      triggerNext.disabled = true;
+    } else {
+      triggerNext.innerText = "Next Chapter →";
+      triggerNext.disabled = false;
+    }
+  }
+
+  function shiftChapter(movementStep) {
+    pointerChapter += movementStep;
+    if (pointerChapter < 1) pointerChapter = 1;
+    if (pointerChapter > 5) pointerChapter = 5;
+    fetchAndRenderChapter(pointerChapter);
+    window.scrollTo(0, 0);
+  }
+
+  // Staggered manuscript reveal
+  document.addEventListener("DOMContentLoaded", () => {
+    const rows = ["sync-row-1", "sync-row-2", "sync-row-3", "sync-row-4", "sync-row-5"];
+    rows.forEach((id, i) => {
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('visible');
+      }, (i + 1) * 500);
+    });
+  });
+
+  // Hero artwork fades out as the user scrolls past it
+  window.addEventListener('scroll', () => {
+    const heroMedia = document.getElementById('heroMedia');
+    const homePage = document.getElementById('view-home');
+    if (!heroMedia || !homePage || !homePage.classList.contains('active')) return;
+
+    const fadeDistance = window.innerHeight * 0.7;
+    const progress = Math.min(window.scrollY / fadeDistance, 1);
+    heroMedia.style.opacity = String(1 - progress);
+    heroMedia.style.transform = `translateY(${progress * -30}px) scale(${1 - progress * 0.05})`;
+  }, { passive: true });
+</script>
+</body>
+</html>
